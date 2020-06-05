@@ -3,21 +3,29 @@ from os import system
 import uuid
 import re 
 from datetime import datetime
+from datetime import timedelta 
 
 # FUNCTON SECTION STARTS
 def display_book_lending_options(): 
     print("1) Lend a book")
     print("2) Return a book ")
     print("3) Add a book ")
-    print("4) View Admin ")
     print("5) Exit")
     print("6) Previous Menu ")
+
+def display_admin_options():
+    print("1) View all users")
+    print("2) View all books")
+    print("3) View all authors")
+    print("4) View lent books information")
+    print("5) Make someone admin")
 
 def display_main_menu(): 
     print("wELCOME TO BOOKAHOICS LIB !! \n")
     print("1) New Membership ")
     print("2) Existing Account ")
-    print("3) Exit ")
+    print("3) Admin Account")
+    print("4) Exit ")
     print("Enter choice")
 
 def display_book_names():
@@ -35,11 +43,108 @@ def display_book_names():
 
     return books 
 
+def print_all_books():
+    connection = table_connection()
+    cursor = connection.cursor()
+    sql = "select name from book"
+    cursor.execute(sql)
+    books = cursor.fetchall()
+    for book in books: 
+        print(book[0])
+
+    connection.close()
+
+def view_all_authors():
+    connection = table_connection()
+    cursor = connection.cursor()
+    sql = "select distinct author from book"
+    cursor.execute(sql)
+    authors = cursor.fetchall()
+    for author in authors: 
+        print(author[0])
+
+    connection.close()
+
+def print_all_users():
+    connection = table_connection()
+    cursor = connection.cursor()
+    sql = "select username from user"
+    cursor.execute(sql)
+    users = cursor.fetchall()
+    for user in users: 
+        print(user[0])
+
+    connection.close()
+
+def get_formatted_datetime(datetime): 
+    date = str(datetime.day) + "-" + str(datetime.month) + "-" + str(datetime.year)
+    time = str(datetime.hour) + ":" + str(datetime.minute) + ":" + str(datetime.second)
+    return (f"Date: {date} Time: {time} ")
+
+def display_lent_books_information():
+    info = []
+    connection = table_connection()
+    cursor = connection.cursor()
+    sql = "select book.name, user.username, book.date_of_issue from book join user on user.uuid = book.issued_by"
+    cursor.execute(sql)
+    results = cursor.fetchall()
+    for ele in results: 
+        info_dict = {}
+        info_dict['book_name'] = ele[0]
+        info_dict['username'] = ele[1]
+        info_dict['date_of_issue'] = get_formatted_datetime(ele[2])
+        info.append(info_dict)
+
+    connection.close()
+    print("USER NAME \t\t BOOK NAME \t\t DATE OF ISSUE")
+    for record in info: 
+        print(record['username'], "\t\t", record['book_name'], "\t\t", record['date_of_issue'])
+
+
+def is_user_valid(username, cursor): 
+    sql = "select count(*) from user where username = %s"
+    cursor.execute(sql, (username,))
+    user_count = cursor.fetchone()
+    if user_count[0] == 1:
+        return True
+
+    return False
+        
+def make_admin(): 
+    connection = table_connection()
+    cursor = connection.cursor()
+    system('cls')
+    print("Enter the name of the user you wantto make admin")
+    username = input()
+    if is_user_valid(username, cursor): 
+        sql = 'update user set is_admin = %s where username = %s'
+        cursor.execute(sql, (True, username,))
+        try: 
+            connection.commit()
+
+        except Exception as e: 
+            print(e)
+            print("There was an error while trying to update user.")
+
+        finally: 
+            connection.close()
+
+def is_user_admin(username, password):
+    connection = table_connection()
+    cursor = connection.cursor()
+    sql = "select is_admin from user where username = %s and password = %s"
+    cursor.execute(sql, (username, password,))
+    result = cursor.fetchone()
+    
+    if result[0] == 1: 
+        return True
+
+    return False
 
 def is_member_valid(username, password): 
     connection = table_connection()
     cursor = connection.cursor()
-    sql = "select uuid from user where username = %s and password = %s"
+    sql = "select Book.uuid from user where username = %s and password = %s"
     cursor.execute(sql, (username, password,))
     result = cursor.fetchone()
     connection.close()
@@ -60,6 +165,7 @@ def return_book(book_name):
             
     finally: 
         connection.close()
+
 
 def check_book_validations(book_name, member_id): 
     connection = table_connection()
@@ -131,6 +237,33 @@ def database_connection():
      connection = mycon.connect(host="localhost",user="root",password="saumya")
      return connection
 
+def add_book(): 
+    print("Enter name of the book ")
+    name = input()
+    print("Enter name of Author")
+    author = input()
+    print("Enter Genre of the book ")
+    genre = input()
+    print("Enter type of the book ")
+    type = input()
+
+    connection = table_connection()
+    cursor = connection.cursor()
+    sql = "Insert into book (uuid, name, author, genre, type) VALUES (%s, %s, %s, %s, %s)" 
+    values = (str(uuid.uuid4()), name, author, genre, type)
+    cursor.execute(sql, values)
+    try: 
+        connection.commit()
+        print("Book has been added successfully to the database")
+
+    except Exception as e: 
+        print(e)
+        print("There was an error while trying to add book.")
+
+    finally: 
+        connection.close()
+
+
 def new_membership(values):
     username = values[0]
     password= values[1]
@@ -156,7 +289,31 @@ def new_membership(values):
             connection.close()
 
     else: 
-        print("There seems to be something wrong with thwe values you have provided. Please try again .!")
+        print("There seems to be something wrong with the values you have provided. Please try again .!")
+
+def check_for_pending_fines(date_of_issue): 
+    now = datetime.now()
+    after_one_month = date_of_issue + timedelta(days=30)
+
+    if after_one_month > now:
+        difference = after_one_month - now
+        return (difference.days * 10)
+
+    return None
+
+def check_for_pending_books(user_id): 
+    connection = table_connection()
+    cursor = connection.cursor()
+    sql = "select name, date_of_issue from book where issued_by = %s"
+    cursor.execute(sql, (user_id,))
+    (book_name, date_of_issue) = cursor.fetchone()
+    connection.close()
+    if (book_name and date_of_issue): 
+        fine = check_for_pending_fines(date_of_issue)
+        return (book_name, fine)
+
+    else: 
+        return None
 
 
 def input_and_save_user(): 
@@ -212,3 +369,11 @@ def alter_table_book():
     print("Added a new column")
     connection.close()  
 
+def alter_table_user(): 
+    connection = table_connection()
+    cursor = connection.cursor()
+    q = "alter table user alter is_admin set default %s"
+    cursor.execute(q, (False,))
+    connection.commit()
+    print("New column added ")
+    connection.close()
