@@ -13,7 +13,7 @@ for iter in range(0, 20):
     author_names.append(names.get_full_name())
 
 def create_table_book(): 
-    con= mycon.connect(host="localhost",user="root",password="saumya", database="school")
+    con= mycon.connect(host="localhost",user="root",password="Android@291296", database="school")
     str1="CREATE TABLE book (uuid varchar(255), name varchar (255), author varchar (255), genre varchar (255), type varchar (255), issued_by varchar (255))"
     cur=con.cursor()
     cur.execute(str1)
@@ -28,7 +28,7 @@ def create_table_book():
 #     print("Never Mind ")
 
 # finally: 
-#     connection = mycon.connect(host="localhost",user="root",password="saumya", database="school")
+#     connection = mycon.connect(host="localhost",user="root",password="Android@291296", database="school")
 #     cursor = connection.cursor()
 
 #     for iter in range(0, 100):
@@ -48,7 +48,7 @@ def create_table_book():
 #     connection.close()
 
 def populate_user(): 
-    con= mycon.connect(host="localhost",user="root",password="saumya", database="school")
+    con= mycon.connect(host="localhost",user="root",password="Android@291296", database="school")
     cursor = con.cursor()
 
     for iter in range(0, 100): 
@@ -103,5 +103,5 @@ def lend_books_to_random_users():
     
     connection.close()
 
-# populate_user()
-# lend_books_to_random_users()
+populate_user()
+lend_books_to_random_users()

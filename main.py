@@ -30,13 +30,17 @@ def handle_admin_cases(choice):
         utils.make_admin()
         utils.display_admin_options()
         handle_admin_cases(int(input()))
+    
+    elif choice == 6: 
+        utils.display_main_menu()
+        render_cases(int(input()))
 
     else: 
         print("Invalid Input")
 
 def handle_book_lend_cases(choice, member_id): 
     if choice == 1: 
-            (book_name, fine) = utils.check_for_pending_books(member_uuid)
+            (book_name, fine) = utils.check_for_pending_books(member_id)
             if fine is not None: 
                 print("You have a pending book ")
                 print("Book Name-> ",book_name)
@@ -74,6 +78,13 @@ def handle_book_lend_cases(choice, member_id):
             utils.add_book()
             utils.display_book_lending_options()
             handle_book_lend_cases(int(input()), member_id)
+
+    elif choice == 4: 
+        exit()
+    
+    elif choice == 5: 
+        utils.display_main_menu()
+        render_cases(int(input()))
 
     else: 
         print("Invalid Input")

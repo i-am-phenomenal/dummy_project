@@ -10,8 +10,8 @@ def display_book_lending_options():
     print("1) Lend a book")
     print("2) Return a book ")
     print("3) Add a book ")
-    print("5) Exit")
-    print("6) Previous Menu ")
+    print("4) Exit")
+    print("5) Previous Menu ")
 
 def display_admin_options():
     print("1) View all users")
@@ -19,6 +19,7 @@ def display_admin_options():
     print("3) View all authors")
     print("4) View lent books information")
     print("5) Make someone admin")
+    print("6) Previous Menu")
 
 def display_main_menu(): 
     print("wELCOME TO BOOKAHOICS LIB !! \n")
@@ -144,7 +145,7 @@ def is_user_admin(username, password):
 def is_member_valid(username, password): 
     connection = table_connection()
     cursor = connection.cursor()
-    sql = "select Book.uuid from user where username = %s and password = %s"
+    sql = "select uuid from user where username = %s and password = %s"
     cursor.execute(sql, (username, password,))
     result = cursor.fetchone()
     connection.close()
@@ -230,11 +231,11 @@ def is_email_valid(email):
     return False
 
 def table_connection():
-    con = mycon.connect(host="localhost",user="root",password="saumya", database="school")
+    con = mycon.connect(host="localhost",user="root",password="Android@291296", database="school")
     return con
 
 def database_connection(): 
-     connection = mycon.connect(host="localhost",user="root",password="saumya")
+     connection = mycon.connect(host="localhost",user="root",password="Android@291296")
      return connection
 
 def add_book(): 
@@ -306,15 +307,15 @@ def check_for_pending_books(user_id):
     cursor = connection.cursor()
     sql = "select name, date_of_issue from book where issued_by = %s"
     cursor.execute(sql, (user_id,))
-    (book_name, date_of_issue) = cursor.fetchone()
+    results = cursor.fetchone()
     connection.close()
-    if (book_name and date_of_issue): 
-        fine = check_for_pending_fines(date_of_issue)
-        return (book_name, fine)
-
+    if results is None: 
+        return (None, None)
     else: 
-        return None
-
+        (book_name, date_of_issue) = results
+        if (book_name and date_of_issue): 
+            fine = check_for_pending_fines(date_of_issue)
+            return (book_name, fine)
 
 def input_and_save_user(): 
     system('cls')
@@ -377,3 +378,6 @@ def alter_table_user():
     connection.commit()
     print("New column added ")
     connection.close()
+
+# alter_table_book()
+# alter_table_user()
