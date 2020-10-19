@@ -103,5 +103,5 @@ def lend_books_to_random_users():
     
     connection.close()
 
-populate_user()
-lend_books_to_random_users()
+# populate_user()
+# lend_books_to_random_users()
