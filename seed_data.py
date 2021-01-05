@@ -57,7 +57,7 @@ def populate_user():
         username = "user_" + str(iter)
         password = "pass_" + str(iter)
         query = "insert into user (uuid, username, password, date_of_birth, email, phone_number, is_admin) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        values = (converted, username, password, "29-12-1996", "chat29aditya@gmail.com", "1234567890", False)
+        values = (converted, username, password, "03-11-2003", "saumyachat03@gmail.com", "1234567890", False)
         cursor.execute(query, values)
         con.commit()
 

@@ -22,7 +22,7 @@ def display_admin_options():
     print("6) Previous Menu")
 
 def display_main_menu(): 
-    print("wELCOME TO BOOKAHOICS LIB !! \n")
+    print("WELCOME TO BOOKAHOLICS LIBRARY! \n")
     print("1) New Membership ")
     print("2) Existing Account ")
     print("3) Admin Account")
